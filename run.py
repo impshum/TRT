@@ -59,7 +59,7 @@ class MyStreamListener(tweepy.StreamListener):
             yup = [body.lower() for keyword in keywords if keyword in body.lower()]
             if len(yup):
                 reddit.subreddit(target_subreddit).submit(body, selftext='')
-                print(f'Posted {user} tweet to Reddit')
+                print('Posted to Reddit')
 
     def on_error(self, status_code):
         if status_code == 420:
@@ -71,7 +71,7 @@ myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
 
 
 def error(update, context):
-    logger.warning(f'Update {update} caused error {context.error}')
+    logger.warning(update + '\n' + context.error)
     context.bot.send_message(chat_id=update.effective_chat.id, text=context.error)
 
 
@@ -115,25 +115,25 @@ def do_input(update, context):
         user_input = user_input.replace(add_u, '')
         if len(user_input):
             with open('follow_ids.txt', 'a') as f:
-                f.write(f'{user_input}\n')
-            msg = f'Added {user_input}'
+                f.write(user_input + '\n')
+            msg = 'Added' + user_input
     elif user_input.startswith(remove_u):
         user_input = user_input.replace(remove_u, '')
         if len(user_input):
             remove_line('follow_ids.txt', user_input)
-            msg = f'Removed {user_input}'
+            msg = 'Removed' + user_input
 
     elif user_input.startswith(add_w):
         user_input = user_input.replace(add_w, '')
         if len(user_input):
             with open('keywords.txt', 'a') as f:
-                f.write(f'{user_input}\n')
-            msg = f'Added {user_input}'
+                f.write(user_input + '\n')
+            msg = 'Added' + user_input
     elif user_input.startswith(remove_w):
         user_input = user_input.replace(remove_w, '')
         if len(user_input):
             remove_line('keywords.txt', user_input)
-            msg = f'Removed {user_input}'
+            msg = 'Removed' + user_input
 
     elif user_input == list_u:
         with open('follow_ids.txt') as f:
