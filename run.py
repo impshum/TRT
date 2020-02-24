@@ -71,7 +71,7 @@ myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
 
 
 def error(update, context):
-    logger.warning(update + '\n' + context.error)
+    logger.warning('{}\n{}'.format(update, context.error))
     context.bot.send_message(chat_id=update.effective_chat.id, text=context.error)
 
 
