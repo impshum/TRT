@@ -125,7 +125,6 @@ class MyStreamListener(tweepy.StreamListener):
                 history_dump(title)
                 reddit.subreddit(target_subreddit).submit(title, selftext='')
                 print('Posted {} tweet to Reddit'.format(user))
-                print(keywords)
 
     def on_error(self, status_code):
         if status_code == 420:
@@ -238,10 +237,13 @@ def start_stream(update, context):
     keywords = []
     for x in kw_db.getall():
         keywords.append(x)
-    myStream.filter(follow=follow_ids, async=True)
+    run_stream(follow_ids)
     msg = 'Started Twitter stream'
     context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
     print(msg)
+
+def run_stream(follow_ids):
+    myStream.filter(follow=follow_ids, async=True)
 
 
 def stop_stream(update, context):
