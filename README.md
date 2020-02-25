@@ -19,11 +19,11 @@ Streams Twitter and reposts to a chosen subreddit when keywords are found in use
 -   `/wa` - add word  
 -   `/wr` - remove word  
 -   `/wl` - lists all words  
+-   `/h` - post history
 -   `/start` - start twitter stream
 -   `/stop` - stop twitter stream  
 
 ### Notes
 
--   Words can be added whilst streaming.
--   To add a user id you have to stop the stream, add id then start again.
+-   Add user ids and keywords when the stream is stopped. To update you have to stop the stream, add then start again.
 -   I will not be held responsible for any bad things that might happen to you or your accounts whilst using this bot. Stay safe.
