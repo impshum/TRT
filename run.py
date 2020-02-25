@@ -133,7 +133,7 @@ class MyStreamListener(tweepy.StreamListener):
 
 
 myStreamListener = MyStreamListener()
-myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
+myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener, is_async=True)
 
 
 def from_creator(status):
@@ -245,7 +245,7 @@ def start_stream(update, context):
 
 
 def run_stream(follow_ids):
-    myStream.filter(follow=follow_ids, async=True)
+    myStream.filter(follow=follow_ids)
 
 
 def stop_stream(update, context):
