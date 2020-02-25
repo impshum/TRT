@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import praw
 import tweepy
 import configparser
