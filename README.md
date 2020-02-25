@@ -2,6 +2,8 @@
 
 Streams Twitter and reposts to a chosen subreddit when keywords are found in users tweets. Controllable via Telegram.
 
+![](ss.jpg)
+
 ### Instructions
 
 -   Install requirements `pip install -r requirements.txt`
