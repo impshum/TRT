@@ -218,9 +218,13 @@ def word_list(update, context):
 
 def history(update, context):
     msg = ''
+    c = 0
     for x in h_db.getall():
         posted = get_date(h_db.get(x))
         msg += '{}\n{}\n\n'.format(posted, x)
+        c += 1
+        if c >= 10:
+            break
     if not len(msg):
         msg = 'history db empty'
     context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
