@@ -41,9 +41,9 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-id_db = pickledb.load('data/id_db.db', False)
-kw_db = pickledb.load('data/kw_db.db', False)
-h_db = pickledb.load('data/h_db.db', False)
+id_db = pickledb.load('id_db.db', False)
+kw_db = pickledb.load('kw_db.db', False)
+h_db = pickledb.load('h_db.db', False)
 
 keywords = []
 
