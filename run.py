@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import praw
 import tweepy
 import configparser
@@ -42,9 +41,9 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-id_db = pickledb.load('id_db.db', False)
-kw_db = pickledb.load('kw_db.db', False)
-h_db = pickledb.load('h_db.db', False)
+id_db = pickledb.load('data/id_db.db', False)
+kw_db = pickledb.load('data/kw_db.db', False)
+h_db = pickledb.load('data/h_db.db', False)
 
 keywords = []
 
@@ -133,7 +132,7 @@ class MyStreamListener(tweepy.StreamListener):
 
 
 myStreamListener = MyStreamListener()
-myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener, is_async=True)
+myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
 
 
 def from_creator(status):
@@ -238,14 +237,10 @@ def start_stream(update, context):
     keywords = []
     for x in kw_db.getall():
         keywords.append(x)
-    run_stream(follow_ids)
+    myStream.filter(follow=follow_ids, is_async=True)
     msg = 'Started Twitter stream'
     context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
     print(msg)
-
-
-def run_stream(follow_ids):
-    myStream.filter(follow=follow_ids)
 
 
 def stop_stream(update, context):

@@ -1,8 +1,5 @@
 praw
 tweepy
 configparser
-logging
 python-telegram-bot
-string
-re
 pickledb
