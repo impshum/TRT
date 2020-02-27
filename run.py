@@ -116,21 +116,24 @@ class MyStreamListener(tweepy.StreamListener):
     def on_status(self, status):
         if from_creator(status) and not status.retweeted and 'RT @' not in status.text:
             user = status.user.name
-            title = status.text
+            body = status.text
+            url = False
             keywords = get_keywords()
-            yup = [title.lower()
-                   for keyword in keywords if keyword in title.lower()]
+            yup = [body.lower()
+                   for keyword in keywords if keyword in body.lower()]
             if len(yup):
-                urls = re.findall(r'(https?://\S+)', title)
+                if len(status.entities['urls']):
+                    expanded_url = status.entities['urls'][0]['expanded_url']
+                #title = strip_all_entities(body)
+                urls = re.findall(r'(https?://\S+)', body)
                 if len(urls):
                     for url in urls:
-                        title = title.replace(url, '')
-                #title = strip_all_entities(body)
-                history_dump(title)
-                if len(urls):
-                    reddit.subreddit(target_subreddit).submit(title, url=urls[-1])
+                        body = body.replace(url, '')
+                history_dump(body)
+                if url:
+                    reddit.subreddit(target_subreddit).submit(body, url=expanded_url)
                 else:
-                    reddit.subreddit(target_subreddit).submit(title, selftext='')
+                    reddit.subreddit(target_subreddit).submit(body, selftext='')
                 print('Posted {} tweet to Reddit'.format(user))
 
     def on_error(self, status_code):
