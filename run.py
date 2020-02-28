@@ -6,7 +6,6 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import re
 import string
 import pickledb
-import schedule
 import time
 from bs4 import BeautifulSoup
 from requests import get

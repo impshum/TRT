@@ -3,3 +3,5 @@ tweepy
 configparser
 python-telegram-bot
 pickledb
+beautifulSoup4
+threading
