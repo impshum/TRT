@@ -10,6 +10,7 @@ import time
 from bs4 import BeautifulSoup
 from requests import get
 import threading
+from random import randint
 
 
 print('Booting up...')
@@ -327,9 +328,9 @@ def nbo():
     c = 0
     while True:
         c += 1
-        if c % 10 == 0:
+        if c % 15 == 0:
             nbo_scraper()
-        time.sleep(1)
+        time.sleep(randint(1,2))
         global stop_nbo
         if stop_nbo:
             print('Stopped NBO scraper')
@@ -366,6 +367,8 @@ def help(update, context):
 /h - post history
 /go - start twitter stream
 /stop - stop twitter stream
+/gonbo - start nbo scraper
+/stopnbo - stop nbo scraper
     """
     context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
 
