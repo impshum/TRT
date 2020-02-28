@@ -6,7 +6,12 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import re
 import string
 import pickledb
+import schedule
 import time
+from bs4 import BeautifulSoup
+from requests import get
+import threading
+
 
 print('Booting up...')
 
@@ -44,6 +49,7 @@ logger = logging.getLogger(__name__)
 id_db = pickledb.load('id_db.db', False)
 kw_db = pickledb.load('kw_db.db', False)
 h_db = pickledb.load('h_db.db', False)
+bno_db = pickledb.load('bno_db.db', False)
 
 keywords = []
 
@@ -97,6 +103,12 @@ def kw_rem(thing):
         return True
 
 
+def bno_set(source, title):
+    if not bno_db.exists(source):
+        bno_db.set(source, title)
+        return True
+
+
 def strip_all_entities(text):
     entity_prefixes = ['@', '#']
     for separator in string.punctuation:
@@ -109,6 +121,51 @@ def strip_all_entities(text):
             if word[0] not in entity_prefixes:
                 words.append(word)
     return ' '.join(words)
+
+
+def nbo_scraper(first_run=False):
+    url = 'https://bnonews.com/index.php/2020/02/the-latest-coronavirus-cases/'
+    soup = lovely_soup(url)
+
+    data = []
+    new, old = 0, 0
+
+    main = soup.find('div', {'id': 'mvp-content-main'})
+
+    for ul in main.find_all('ul')[1:]:
+        start = ul.find_all('li')[0]
+        start_time = start.get_text(strip=True)[0:5]
+        start_source = start.find('a', href=True)
+        if is_time_format(start_time) and start_time and start_source:
+            for li in ul.find_all('li'):
+                line_text = li.get_text(strip=True).replace(' (Source)', '')
+                source = start_source['href']
+                title = line_text[7:-1]
+                if first_run:
+                    new += 1
+                    bno_set(source, title)
+                else:
+                    if bno_set(source, title):
+                        reddit.subreddit(target_subreddit).submit(title, url=source)
+                        history_dump(title)
+                        print('Posted: {}'.format(title))
+                        new += 1
+                    else:
+                        old += 1
+    if new:
+        bno_db.dump()
+    print(f'old: {old} new: {new}'
+
+def lovely_soup(u):
+    r = get(u, headers={'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1'})
+    return BeautifulSoup(r.text, 'lxml')
+
+
+time_re = re.compile(r'^(([01]\d|2[0-3]):([0-5]\d)|24:00)$')
+
+
+def is_time_format(s):
+    return bool(time_re.match(s))
 
 
 class MyStreamListener(tweepy.StreamListener):
@@ -260,6 +317,45 @@ def stop_stream(update, context):
     print(msg)
 
 
+stop_nbo = False
+
+def nbo():
+    if len(bno_db.getall()):
+        nbo_scraper()
+    else:
+        nbo_scraper(True)
+
+    c = 0
+    while True:
+        c += 1
+        if c % 10 == 0:
+            nbo_scraper()
+        time.sleep(1)
+        global stop_nbo
+        if stop_nbo:
+            print('Stopped NBO scraper')
+            break
+
+
+def start_nbo_scaper(update, context):
+    global stop_nbo
+    stop_nbo = False
+    nbo_thread = threading.Thread(target=nbo)
+    nbo_thread.start()
+
+    msg = 'Started NBO scraper'
+    context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
+    print(msg)
+
+
+def stop_nbo_scaper(update, context):
+    global stop_nbo
+    stop_nbo = True
+    msg = 'Stopping NBO scraper'
+    context.bot.send_message(chat_id=update.effective_chat.id, text=msg)
+    print(msg)
+
+
 def help(update, context):
     msg = """
 /ua - add user id
@@ -297,6 +393,10 @@ def main():
         'go', start_stream, Filters.user(username=telegram_admin)))
     dp.add_handler(CommandHandler(
         'stop', stop_stream, Filters.user(username=telegram_admin)))
+    dp.add_handler(CommandHandler(
+        'gonbo', start_nbo_scaper, Filters.user(username=telegram_admin)))
+    dp.add_handler(CommandHandler(
+        'stopnbo', stop_nbo_scaper, Filters.user(username=telegram_admin)))
     dp.add_handler(CommandHandler(
         'help', help, Filters.user(username=telegram_admin)))
 
