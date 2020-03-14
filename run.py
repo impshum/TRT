@@ -124,37 +124,41 @@ def strip_all_entities(text):
 
 
 def nbo_scraper(first_run=False):
-    url = 'https://bnonews.com/index.php/2020/02/the-latest-coronavirus-cases/'
-    soup = lovely_soup(url)
+    try:
+        url = 'https://bnonews.com/index.php/2020/02/the-latest-coronavirus-cases/'
+        soup = lovely_soup(url)
 
-    data = []
-    new, old = 0, 0
+        data = []
+        new, old = 0, 0
 
-    main = soup.find('div', {'id': 'mvp-content-main'})
+        main = soup.find('div', {'id': 'mvp-content-main'})
 
-    for ul in main.find_all('ul')[1:]:
-        start = ul.find_all('li')[0]
-        start_time = start.get_text(strip=True)[0:5]
-        start_source = start.find('a', href=True)
-        if is_time_format(start_time) and start_time and start_source:
-            for li in ul.find_all('li'):
-                line_text = li.get_text(strip=True).replace(' (Source)', '')
-                source = start_source['href']
-                title = line_text[7:-1]
-                if first_run:
-                    new += 1
-                    bno_set(source, title)
-                else:
-                    if bno_set(source, title):
-                        reddit.subreddit(target_subreddit).submit(title, url=source)
-                        history_dump(title)
-                        print('Posted: {}'.format(title))
+        for ul in main.find_all('ul')[1:]:
+            start = ul.find_all('li')[0]
+            start_time = start.get_text(strip=True)[0:5]
+            start_source = start.find('a', href=True)
+            if is_time_format(start_time) and start_time and start_source:
+                for li in ul.find_all('li'):
+                    line_text = li.get_text(strip=True).replace(' (Source)', '')
+                    source = start_source['href']
+                    title = line_text[7:-1]
+                    if first_run:
                         new += 1
+                        bno_set(source, title)
                     else:
-                        old += 1
-    if new:
-        bno_db.dump()
-    print(f'old: {old} new: {new}')
+                        if bno_set(source, title):
+                            reddit.subreddit(target_subreddit).submit(title, url=source)
+                            history_dump(title)
+                            print('Posted: {}'.format(title))
+                            new += 1
+                        else:
+                            old += 1
+        if new:
+            bno_db.dump()
+        print(f'old: {old} new: {new}')
+    except Exception as e:
+        print(f'\n\nSHOW IMPSHUM THIS IF YOU SEE IT\n\n{e}\n\n')
+
 
 def lovely_soup(u):
     r = get(u, headers={'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1'})
